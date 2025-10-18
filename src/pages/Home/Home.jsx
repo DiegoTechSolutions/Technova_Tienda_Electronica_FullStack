@@ -1,61 +1,129 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
 import Macbook from "../../assets/img/macbook-pro-m2.png";
 import iPhone from "../../assets/img/iphone15promax.png";
 import Samsung from "../../assets/img/SAMSUNG-S24-ULTRA.png";
 import Airpods from "../../assets/img/Apple_A.png";
 
-
-
 const Home = ({ onAddToCart = () => {}, onViewDetails = () => {} }) => {
-  //Productos destacados
+  const [user, setUser] = useState(null);
+  const [cart, setCart] = useState([]);
+  const navigate = useNavigate();
+
+  // Cargar usuario y carrito desde localStorage al iniciar
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    const savedCart = localStorage.getItem('cart');
+    
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+    if (savedCart) {
+      setCart(JSON.parse(savedCart));
+    }
+  }, []);
+
+  // Función para manejar agregar al carrito
+  const handleAddToCart = (product) => {
+    if (!user) {
+      alert('Debes iniciar sesión para agregar productos al carrito');
+      navigate('/login');
+      return;
+    }
+
+    const existingItem = cart.find(item => item.id === product.id);
+    let updatedCart;
+
+    if (existingItem) {
+      updatedCart = cart.map(item =>
+        item.id === product.id 
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      );
+    } else {
+      updatedCart = [...cart, { ...product, quantity: 1 }];
+    }
+
+    setCart(updatedCart);
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+    onAddToCart(product);
+    
+    alert('Producto agregado al carrito');
+  };
+
+  // Función para manejar cierre de sesión
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+    setCart([]);
+    localStorage.removeItem('cart');
+    alert('Sesión cerrada correctamente');
+    window.location.reload();
+  };
+
+  // Función para redirigir a categorías
+  const handleShopNow = () => {
+    navigate('/categories');
+  };
+
+  // Función para redirigir a ofertas
+  const handleViewOffers = () => {
+    navigate('/offers');
+  };
+
+  // Función para ver detalles del producto
+  const handleViewDetails = (product) => {
+    navigate(`/product/${product.id}`, { state: { product } });
+  };
+
+  // Productos destacados
   const featuredProducts = [
-  {
-    id: 1,
-    name: "MacBook Pro 16\" M2 Pro",
-    category: "laptops",
-    price: 2499990,
-    image: "💻",
-    imageUrl: Macbook,
-    description: "Laptop profesional con chip M2 Pro, 16GB RAM, 1TB SSD",
-    badge: "Nuevo",
-    badgeVariant: "success"
-  },
-  {
-    id: 2,
-    name: "iPhone 15 Pro Max",
-    category: "smartphones", 
-    price: 1499990,
-    image: "📱",
-    imageUrl: iPhone, // Imagen local
-    description: "iPhone flagship con cámara profesional y titanio",
-    badge: "Popular",
-    badgeVariant: "primary"
-  },
-  {
-    id: 3,
-    name: "Samsung Galaxy S24 Ultra",
-    category: "smartphones",
-    price: 1199990,
-    image: "📱",
-    imageUrl: Samsung, // Imagen local
-    description: "Android premium con IA integrada y S Pen", 
-    badge: "Destacado",
-    badgeVariant: "warning"
-  },
-  {
-    id: 5,
-    name: "AirPods Pro 2da Generación",
-    category: "audio",
-    price: 349990,
-    image: "🎧",
-    imageUrl: Airpods, // Imagen local
-    description: "Audífonos con cancelación activa de ruido",
-    badge: "Oferta", 
-    badgeVariant: "accent"
-  }
-];
+    {
+      id: 1,
+      name: "MacBook Pro 16\" M2 Pro",
+      category: "laptops",
+      price: 2499990,
+      image: "💻",
+      imageUrl: Macbook,
+      description: "Laptop profesional con chip M2 Pro, 16GB RAM, 1TB SSD",
+      badge: "Nuevo",
+      badgeVariant: "success"
+    },
+    {
+      id: 2,
+      name: "iPhone 15 Pro Max",
+      category: "smartphones", 
+      price: 1499990,
+      image: "📱",
+      imageUrl: iPhone,
+      description: "iPhone flagship con cámara profesional y titanio",
+      badge: "Popular",
+      badgeVariant: "primary"
+    },
+    {
+      id: 3,
+      name: "Samsung Galaxy S24 Ultra",
+      category: "smartphones",
+      price: 1199990,
+      image: "📱",
+      imageUrl: Samsung,
+      description: "Android premium con IA integrada y S Pen", 
+      badge: "Destacado",
+      badgeVariant: "warning"
+    },
+    {
+      id: 5,
+      name: "AirPods Pro 2da Generación",
+      category: "audio",
+      price: 349990,
+      image: "🎧",
+      imageUrl: Airpods,
+      description: "Audífonos con cancelación activa de ruido",
+      badge: "Oferta", 
+      badgeVariant: "accent"
+    }
+  ];
 
   const categories = [
     {
@@ -125,6 +193,47 @@ const Home = ({ onAddToCart = () => {}, onViewDetails = () => {} }) => {
 
   return (
     <div className="home-page">
+      {/* Header con navegación y autenticación */}
+      <header className="main-header">
+        <div className="container">
+          <div className="header-content">
+            <div className="logo">
+              <h1>Technova</h1>
+            </div>
+            <nav className="main-nav">
+              <Link to="/" className="nav-link">Inicio</Link>
+              <Link to="/categories" className="nav-link">Categorías</Link>
+              <Link to="/offers" className="nav-link">Ofertas</Link>
+              <Link to="/about" className="nav-link">Nosotros</Link>
+              <Link to="/blog" className="nav-link">Blog</Link>
+              <Link to="/contact" className="nav-link">Contacto</Link>
+            </nav>
+            <div className="header-actions">
+              {user ? (
+                <div className="user-info">
+                  <span className="welcome-text">Bienvenido, {user.name}</span>
+                  <Link to="/cart" className="btn btn-primary btn-sm cart-btn">
+                    🛒 Carrito ({cart.reduce((total, item) => total + item.quantity, 0)})
+                  </Link>
+                  <button onClick={handleLogout} className="btn btn-outline btn-sm logout-btn">
+                    Cerrar Sesión
+                  </button>
+                </div>
+              ) : (
+                <div className="auth-buttons">
+                  <Link to="/login" className="btn btn-outline btn-sm login-btn">
+                    Iniciar Sesión
+                  </Link>
+                  <Link to="/register" className="btn btn-primary btn-sm register-btn">
+                    Registrarse
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section className="hero-section">
         <div className="container">
@@ -142,12 +251,18 @@ const Home = ({ onAddToCart = () => {}, onViewDetails = () => {} }) => {
                 Más de 10,000 clientes satisfechos en todo Chile.
               </p>
               <div className="hero-actions">
-                <Link to="/categories" className="btn btn-primary btn-lg">
+                <button 
+                  onClick={handleShopNow}
+                  className="btn btn-primary btn-lg shop-now-btn"
+                >
                   Comprar Ahora
-                </Link>
-                <Link to="/offers" className="btn btn-outline btn-lg">
+                </button>
+                <button 
+                  onClick={handleViewOffers}
+                  className="btn btn-outline btn-lg view-offers-btn"
+                >
                   Ver Ofertas
-                </Link>
+                </button>
               </div>
             </div>
             <div className="hero-visual">
@@ -181,7 +296,7 @@ const Home = ({ onAddToCart = () => {}, onViewDetails = () => {} }) => {
                   <h3 className="quick-link-title">{link.title}</h3>
                   <p className="quick-link-description">{link.description}</p>
                 </div>
-                <Link to={link.link} className={`btn btn-${link.variant} btn-sm`}>
+                <Link to={link.link} className={`btn btn-${link.variant} btn-sm quick-link-btn`}>
                   {link.buttonText}
                 </Link>
               </div>
@@ -221,14 +336,14 @@ const Home = ({ onAddToCart = () => {}, onViewDetails = () => {} }) => {
                   <div className="product-price">${product.price.toLocaleString()}</div>
                   <div className="product-actions">
                     <button
-                      className="btn btn-primary btn-sm"
-                      onClick={() => onAddToCart(product)}
+                      className="btn btn-primary btn-sm add-to-cart-btn"
+                      onClick={() => handleAddToCart(product)}
                     >
                       Agregar al Carrito
                     </button>
                     <button
-                      className="btn btn-outline btn-sm"
-                      onClick={() => onViewDetails(product)}
+                      className="btn btn-outline btn-sm view-details-btn"
+                      onClick={() => handleViewDetails(product)}
                     >
                       Ver Detalles
                     </button>
@@ -238,7 +353,7 @@ const Home = ({ onAddToCart = () => {}, onViewDetails = () => {} }) => {
             ))}
           </div>
           <div className="section-footer">
-            <Link to="/categories" className="btn btn-outline">
+            <Link to="/categories" className="btn btn-outline view-all-btn">
               Ver Todos los Productos
             </Link>
           </div>

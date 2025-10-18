@@ -13,7 +13,7 @@ const Header = ({ cartItemsCount = 0, user = null, onLogout = () => {} }) => {
     setIsMobileMenuOpen(false);
   };
 
-  // Datos del carrito simulados
+  //Datos del carrito simulados
   const cartItems = [
     { 
       id: 1, 

@@ -1,118 +1,53 @@
-import React, { createContext, useContext, useReducer } from 'react';
+// src/context/AuthContext.jsx
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { loadJSON, saveJSON } from "../utils/storage";
 
-const CartContext = createContext();
+const AuthContext = createContext(null);
+export const useAuth = () => useContext(AuthContext);
 
-const cartReducer = (state, action) => {
-  switch (action.type) {
-    case 'ADD_TO_CART':
-      const existingItem = state.items.find(item => item.id === action.payload.id);
-      
-      if (existingItem) {
-        return {
-          ...state,
-          items: state.items.map(item =>
-            item.id === action.payload.id
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          )
-        };
-      }
-      
-      return {
-        ...state,
-        items: [...state.items, { ...action.payload, quantity: 1 }]
-      };
-    
-    case 'REMOVE_FROM_CART':
-      return {
-        ...state,
-        items: state.items.filter(item => item.id !== action.payload)
-      };
-    
-    case 'UPDATE_QUANTITY':
-      return {
-        ...state,
-        items: state.items.map(item =>
-          item.id === action.payload.id
-            ? { ...item, quantity: action.payload.quantity }
-            : item
-        )
-      };
-    
-    case 'CLEAR_CART':
-      return {
-        ...state,
-        items: []
-      };
-    
-    default:
-      return state;
-  }
-};
+// Claves de storage
+const USER_KEY = "tn_user";
+const USERS_KEY = "tn_users";
 
-const initialState = {
-  items: []
-};
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(() => loadJSON(USER_KEY, null));
 
-export const CartProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(cartReducer, initialState);
+  useEffect(() => {
+    saveJSON(USER_KEY, user);
+  }, [user]);
 
-  const addToCart = (product) => {
-    dispatch({ type: 'ADD_TO_CART', payload: product });
-  };
-
-  const removeFromCart = (productId) => {
-    dispatch({ type: 'REMOVE_FROM_CART', payload: productId });
-  };
-
-  const updateQuantity = (productId, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-    } else {
-      dispatch({ type: 'UPDATE_QUANTITY', payload: { id: productId, quantity } });
+  const register = ({ name, email, password }) => {
+    const users = loadJSON(USERS_KEY, []);
+    // evita duplicados por email
+    if (users.some((u) => u.email === email)) {
+      throw new Error("El correo ya está registrado.");
     }
+    const newUser = {
+      id: Date.now(),
+      name,
+      email,
+      password, // (para demo académica; en real, encriptar)
+      createdAt: new Date().toISOString(),
+    };
+    users.push(newUser);
+    saveJSON(USERS_KEY, users);
+    setUser({ id: newUser.id, name: newUser.name, email: newUser.email });
+    return newUser;
   };
 
-  const clearCart = () => {
-    dispatch({ type: 'CLEAR_CART' });
+  const login = ({ email, password }) => {
+    const users = loadJSON(USERS_KEY, []);
+    const found = users.find((u) => u.email === email && u.password === password);
+    if (!found) throw new Error("Credenciales inválidas.");
+    setUser({ id: found.id, name: found.name, email: found.email });
+    return found;
   };
 
-  const getTotalItems = () => {
-    return state.items.reduce((total, item) => total + item.quantity, 0);
-  };
-
-  const getTotalPrice = () => {
-    return state.items.reduce((total, item) => {
-      const price = item.discount > 0 
-        ? item.price * (1 - item.discount / 100)
-        : item.price;
-      return total + (price * item.quantity);
-    }, 0);
-  };
-
-  const value = {
-    cartItems: state.items,
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-    clearCart,
-    getTotalItems,
-    getTotalPrice
-  };
+  const logout = () => setUser(null);
 
   return (
-    <CartContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, register, login, logout }}>
       {children}
-    </CartContext.Provider>
+    </AuthContext.Provider>
   );
-};
-
-export const useCart = () => {
-  const context = useContext(CartContext);
-  if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
-  }
-  return context;
-};
-
-export { CartContext };
+}

@@ -1,13 +1,12 @@
-// Asegúrate de que todas las importaciones estén correctas
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/global.css';
 
-// Layout
+//Layout
 import MainLayout from './components/templates/MainLayout/MainLayout';
 
-// Pages
+//Pages
 import Home from './pages/Home/Home';
 import Categories from './pages/Categories/Categories';
 import Offers from './pages/Offers/Offers';
@@ -21,7 +20,7 @@ import About from './pages/About/About';
 import Admin from './pages/Admin/Admin';
 import OrderSuccess from './pages/OrderSuccess/OrderSuccess';
 
-// Data functions
+//Data functiones
 import { getCart, addToCart, createUser, authenticateUser, getCartItemsCount } from './data/database';
 
 function App() {
@@ -29,7 +28,7 @@ function App() {
   const [cartItemsCount, setCartItemsCount] = useState(0);
 
   useEffect(() => {
-    // Actualizar contador del carrito
+    //Actualizar contador del carrito
     const updateCartCount = () => {
       const count = getCartItemsCount();
       setCartItemsCount(count);
@@ -37,13 +36,13 @@ function App() {
 
     updateCartCount();
     
-    // Verificar si hay usuario en localStorage (sesión persistente)
+    //Verificar si hay usuario en localStorage (sesión persistente)
     const savedUser = localStorage.getItem('technova_user');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
 
-    // Actualizar contador cada segundo (para simular cambios en tiempo real)
+    //Actualizar contador cada segundo (para simular cambios en tiempo real)
     const interval = setInterval(updateCartCount, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -76,7 +75,7 @@ function App() {
     localStorage.removeItem('technova_user');
   };
 
-  // Componente para redirección condicional del admin
+  //Componente para redirección condicional del admin
   const AdminRoute = ({ children }) => {
     return user && user.role === 'admin' ? children : <Navigate to="/login" />;
   };
