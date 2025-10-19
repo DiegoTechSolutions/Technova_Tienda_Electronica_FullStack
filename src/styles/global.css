@@ -141,7 +141,7 @@ h6 {
 
 p {
   margin-bottom: var(--space-3);
-  color: var(--muted);
+  color: white;
   line-height: 1.6;
 }
 

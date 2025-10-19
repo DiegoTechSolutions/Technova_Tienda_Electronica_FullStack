@@ -1,38 +1,40 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import Button from '../../components/atoms/Button/Button';
+import { render, screen } from '@testing-library/react';
+import Button from '../../../src/components/atoms/Button/Button';
 
-describe('Button Component', () => {
-  test('1. Renderiza correctamente con children', () => {
+describe('Button Component - Pruebas de Renderizado', () => {
+  test('renderiza correctamente con texto proporcionado', () => {
     render(<Button>Click me</Button>);
-    const buttonElement = screen.getByText(/Click me/i);
+    const buttonElement = screen.getByText(/click me/i);
     expect(buttonElement).toBeInTheDocument();
   });
 
-  test('2. Aplica variante primary correctamente', () => {
+  test('renderiza con variante primary', () => {
     render(<Button variant="primary">Primary Button</Button>);
-    const buttonElement = screen.getByText(/Primary Button/i);
+    const buttonElement = screen.getByText(/primary button/i);
     expect(buttonElement).toHaveClass('btn-primary');
   });
 
-  test('3. Ejecuta onClick cuando se hace clic', () => {
-    const handleClick = jest.fn();
-    render(<Button onClick={handleClick}>Click me</Button>);
-    const buttonElement = screen.getByText(/Click me/i);
-    fireEvent.click(buttonElement);
-    expect(handleClick).toHaveBeenCalledTimes(1);
+  test('renderiza con variante outline', () => {
+    render(<Button variant="outline">Outline Button</Button>);
+    const buttonElement = screen.getByText(/outline button/i);
+    expect(buttonElement).toHaveClass('btn-outline');
   });
 
-  test('4. Se deshabilita correctamente', () => {
-    render(<Button disabled>Disabled Button</Button>);
-    const buttonElement = screen.getByText(/Disabled Button/i);
+  test('renderiza estado de loading correctamente', () => {
+    render(<Button loading>Loading Button</Button>);
+    const buttonElement = screen.getByText(/loading button/i);
+    const spinner = screen.getByTestId('loading-spinner');
+    
     expect(buttonElement).toBeDisabled();
-    expect(buttonElement).toHaveClass('disabled');
+    expect(spinner).toBeInTheDocument();
   });
 
-  test('5. Aplica tamaño large correctamente', () => {
-    render(<Button size="large">Large Button</Button>);
-    const buttonElement = screen.getByText(/Large Button/i);
-    expect(buttonElement).toHaveClass('btn-large');
+  test('renderizado condicional - muestra spinner solo cuando loading es true', () => {
+    const { rerender } = render(<Button loading>Button</Button>);
+    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+
+    rerender(<Button loading={false}>Button</Button>);
+    expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
   });
 });

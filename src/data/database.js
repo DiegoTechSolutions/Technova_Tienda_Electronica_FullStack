@@ -147,13 +147,62 @@ let products = [
 ];
 
 let categories = [
-  { id: 1, name: "Smartphones", slug: "smartphones", image: "/images/category-smartphones.jpg" },
-  { id: 2, name: "Laptops", slug: "laptops", image: "/images/category-laptops.jpg" },
-  { id: 3, name: "Tablets", slug: "tablets", image: "/images/category-tablets.jpg" },
-  { id: 4, name: "Audio", slug: "audio", image: "/images/category-audio.jpg" },
-  { id: 5, name: "Gaming", slug: "gaming", image: "/images/category-gaming.jpg" },
-  { id: 6, name: "Wearables", slug: "wearables", image: "/images/category-wearables.jpg" },
-  { id: 7, name: "Accesorios", slug: "accesorios", image: "/images/category-accesorios.jpg" }
+  { 
+    id: 1, 
+    name: "Smartphones", 
+    slug: "smartphones", 
+    icon: "📱",
+    description: "Los últimos smartphones y dispositivos móviles",
+    productCount: 3
+  },
+  { 
+    id: 2, 
+    name: "Laptops", 
+    slug: "laptops", 
+    icon: "💻",
+    description: "Laptops y computadoras portátiles para trabajo y gaming",
+    productCount: 2
+  },
+  { 
+    id: 3, 
+    name: "Tablets", 
+    slug: "tablets", 
+    icon: "📟",
+    description: "Tablets y dispositivos táctiles",
+    productCount: 2
+  },
+  { 
+    id: 4, 
+    name: "Audio", 
+    slug: "audio", 
+    icon: "🎧",
+    description: "Audífonos, parlantes y equipos de audio",
+    productCount: 2
+  },
+  { 
+    id: 5, 
+    name: "Gaming", 
+    slug: "gaming", 
+    icon: "🎮",
+    description: "Consolas, videojuegos y accesorios gaming",
+    productCount: 2
+  },
+  { 
+    id: 6, 
+    name: "Wearables", 
+    slug: "wearables", 
+    icon: "⌚",
+    description: "Relojes inteligentes y dispositivos wearables",
+    productCount: 1
+  },
+  { 
+    id: 7, 
+    name: "Accesorios", 
+    slug: "accesorios", 
+    icon: "🔌",
+    description: "Accesorios y periféricos para tus dispositivos",
+    productCount: 0
+  }
 ];
 
 let users = [
@@ -163,6 +212,8 @@ let users = [
     password: "admin123",
     name: "Administrador Technova",
     role: "admin",
+    avatar: "A",
+    joinDate: "2024-01-01",
     address: {
       street: "Av. Principal 123",
       department: "Departamento 45",
@@ -176,7 +227,113 @@ let users = [
     password: "cliente123",
     name: "Cliente Demo",
     role: "customer",
+    avatar: "C",
+    joinDate: "2024-01-15",
     address: {
+      street: "Calle Secundaria 456",
+      department: "",
+      region: "Valparaíso",
+      commune: "Viña del Mar"
+    }
+  },
+  {
+    id: 3,
+    email: "juan.perez@email.com",
+    password: "juan123",
+    name: "Juan Pérez",
+    role: "customer",
+    avatar: "J",
+    joinDate: "2024-02-01",
+    address: {
+      street: "Los Alerces 789",
+      department: "Casa 2",
+      region: "Biobío",
+      commune: "Concepción"
+    }
+  }
+];
+
+let orders = [
+  {
+    id: 1,
+    orderNumber: "TECH-001",
+    customer: {
+      id: 2,
+      nombre: "Cliente",
+      apellido: "Demo",
+      email: "cliente@technova.com",
+      address: {
+        street: "Calle Secundaria 456",
+        department: "",
+        region: "Valparaíso",
+        commune: "Viña del Mar"
+      }
+    },
+    items: [
+      { productId: 2, name: "iPhone 15 Pro Max", price: 1499990, quantity: 1 },
+      { productId: 5, name: "AirPods Pro 2da Generación", price: 349990, quantity: 1 }
+    ],
+    total: 1849980,
+    orderDate: "2024-03-10T10:30:00Z",
+    status: "completed",
+    shippingAddress: {
+      street: "Calle Secundaria 456",
+      department: "",
+      region: "Valparaíso",
+      commune: "Viña del Mar"
+    }
+  },
+  {
+    id: 2,
+    orderNumber: "TECH-002",
+    customer: {
+      id: 3,
+      nombre: "Juan",
+      apellido: "Pérez",
+      email: "juan.perez@email.com",
+      address: {
+        street: "Los Alerces 789",
+        department: "Casa 2",
+        region: "Biobío",
+        commune: "Concepción"
+      }
+    },
+    items: [
+      { productId: 1, name: "MacBook Pro 16\" M2 Pro", price: 2499990, quantity: 1 }
+    ],
+    total: 2499990,
+    orderDate: "2024-03-12T14:20:00Z",
+    status: "pending",
+    shippingAddress: {
+      street: "Los Alerces 789",
+      department: "Casa 2",
+      region: "Biobío",
+      commune: "Concepción"
+    }
+  },
+  {
+    id: 3,
+    orderNumber: "TECH-003",
+    customer: {
+      id: 2,
+      nombre: "Cliente",
+      apellido: "Demo",
+      email: "cliente@technova.com",
+      address: {
+        street: "Calle Secundaria 456",
+        department: "",
+        region: "Valparaíso",
+        commune: "Viña del Mar"
+      }
+    },
+    items: [
+      { productId: 8, name: "Sony WH-1000XM5", price: 429990, quantity: 2 },
+      { productId: 12, name: "Apple Watch Series 9", price: 499990, quantity: 1 }
+    ],
+    total: 1359970,
+    orderDate: "2024-03-15T09:15:00Z",
+    status: "completed",
+    shippingAddress: {
       street: "Calle Secundaria 456",
       department: "",
       region: "Valparaíso",
@@ -185,7 +342,6 @@ let users = [
   }
 ];
 
-let orders = [];
 let cart = [];
 
 // CRUD Operations - Products
@@ -206,24 +362,53 @@ export const addProduct = (productData) => {
     inStock: productData.stock > 0
   };
   products.push(newProduct);
+  
+  // Actualizar contador de productos en la categoría
+  const category = categories.find(cat => cat.slug === productData.category);
+  if (category) {
+    category.productCount = getProductsByCategory(category.slug).length;
+  }
+  
   return newProduct;
 };
 
 export const updateProduct = (id, productData) => {
   const index = products.findIndex(product => product.id === parseInt(id));
   if (index !== -1) {
+    const oldCategory = products[index].category;
+    const newCategory = productData.category;
+    
     products[index] = { 
       ...products[index], 
       ...productData,
       inStock: productData.stock > 0
     };
+    
+    // Actualizar contadores de categorías si cambió la categoría
+    if (oldCategory !== newCategory) {
+      const oldCat = categories.find(cat => cat.slug === oldCategory);
+      const newCat = categories.find(cat => cat.slug === newCategory);
+      
+      if (oldCat) oldCat.productCount = getProductsByCategory(oldCategory).length;
+      if (newCat) newCat.productCount = getProductsByCategory(newCategory).length;
+    }
+    
     return products[index];
   }
   return null;
 };
 
 export const deleteProduct = (id) => {
-  products = products.filter(product => product.id !== parseInt(id));
+  const product = products.find(p => p.id === parseInt(id));
+  if (product) {
+    const category = categories.find(cat => cat.slug === product.category);
+    products = products.filter(product => product.id !== parseInt(id));
+    
+    // Actualizar contador de productos en la categoría
+    if (category) {
+      category.productCount = getProductsByCategory(category.slug).length;
+    }
+  }
   return true;
 };
 
@@ -234,7 +419,8 @@ export const getCategoryBySlug = (slug) => categories.find(category => category.
 export const addCategory = (categoryData) => {
   const newCategory = {
     id: Math.max(...categories.map(c => c.id)) + 1,
-    ...categoryData
+    ...categoryData,
+    productCount: 0
   };
   categories.push(newCategory);
   return newCategory;
@@ -264,6 +450,8 @@ export const createUser = (userData) => {
     id: Math.max(...users.map(u => u.id)) + 1,
     ...userData,
     role: 'customer',
+    avatar: userData.name ? userData.name.charAt(0).toUpperCase() : 'U',
+    joinDate: new Date().toISOString(),
     address: {}
   };
   users.push(newUser);
@@ -329,27 +517,29 @@ export const clearCart = () => {
 };
 
 // Order Operations
-export const createOrder = (orderData) => {
+export const getOrders = () => [...orders];
+
+export const getOrderById = (id) => {
+  return orders.find(order => order.id === parseInt(id));
+};
+
+export const addOrder = (orderData) => {
   const newOrder = {
-    id: Math.max(0, ...orders.map(o => o.id)) + 1,
+    id: Math.max(...orders.map(o => o.id)) + 1,
+    orderNumber: `TECH-${String(orders.length + 1).padStart(3, '0')}`,
     ...orderData,
     orderDate: new Date().toISOString(),
-    status: 'pending',
-    orderNumber: 'TECH-' + Date.now()
+    status: 'pending'
   };
   orders.push(newOrder);
-  clearCart();
   return newOrder;
 };
 
-export const getOrders = () => [...orders];
-export const getOrderById = (id) => orders.find(order => order.id === parseInt(id));
-export const getOrdersByUserId = (userId) => orders.filter(order => order.userId === parseInt(userId));
-
-export const updateOrderStatus = (orderId, status) => {
-  const order = getOrderById(orderId);
+export const updateOrderStatus = (id, status) => {
+  const order = orders.find(order => order.id === parseInt(id));
   if (order) {
     order.status = status;
+    order.updatedAt = new Date().toISOString();
     return order;
   }
   return null;
@@ -357,11 +547,29 @@ export const updateOrderStatus = (orderId, status) => {
 
 // Admin Statistics
 export const getAdminStats = () => {
+  const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
+  const pendingOrders = orders.filter(order => order.status === 'pending').length;
+  const completedOrders = orders.filter(order => order.status === 'completed').length;
+  const cancelledOrders = orders.filter(order => order.status === 'cancelled').length;
+
   return {
     totalProducts: products.length,
     totalOrders: orders.length,
     totalUsers: users.length,
-    totalRevenue: orders.reduce((sum, order) => sum + order.total, 0),
-    pendingOrders: orders.filter(order => order.status === 'pending').length
+    totalRevenue,
+    pendingOrders,
+    completedOrders,
+    cancelledOrders,
+    averageOrderValue: orders.length > 0 ? totalRevenue / orders.length : 0
   };
 };
+
+// Inicializar contadores de productos por categoría
+export const initializeCategoryCounts = () => {
+  categories.forEach(category => {
+    category.productCount = getProductsByCategory(category.slug).length;
+  });
+};
+
+// Inicializar los contadores al cargar
+initializeCategoryCounts();

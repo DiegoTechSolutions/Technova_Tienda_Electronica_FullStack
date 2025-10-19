@@ -1,165 +1,78 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './styles/global.css';
+import { CartProvider } from './contexts/CartContext';
+import './App.css';
 
-//Layout
-import MainLayout from './components/templates/MainLayout/MainLayout';
-
-//Pages
+// Pages
 import Home from './pages/Home/Home';
+import Login from './pages/Login/Login';
+import Register from './pages/Register/Register';
 import Categories from './pages/Categories/Categories';
-import Offers from './pages/Offers/Offers';
-import Contact from './pages/Contact/Contact';
+import Blog from './pages/Blog/Blog';
+import Admin from './pages/Admin/Admin';
 import Cart from './pages/Cart/Cart';
 import Checkout from './pages/Checkout/Checkout';
-import ProductDetail from './pages/ProductDetail/ProductDetail';
-import Login from './pages/Login/Login';
-import Blog from './pages/Blog/Blog';
-import About from './pages/About/About';
-import Admin from './pages/Admin/Admin';
 import OrderSuccess from './pages/OrderSuccess/OrderSuccess';
-
-//Data functiones
-import { getCart, addToCart, createUser, authenticateUser, getCartItemsCount } from './data/database';
+import ProductDetail from './pages/ProductDetail/ProductDetail';
+import Offers from './pages/Offers/Offers';
+import About from './pages/About/About';
+import Contact from './pages/Contact/Contact';
 
 function App() {
   const [user, setUser] = useState(null);
-  const [cartItemsCount, setCartItemsCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    //Actualizar contador del carrito
-    const updateCartCount = () => {
-      const count = getCartItemsCount();
-      setCartItemsCount(count);
-    };
-
-    updateCartCount();
-    
-    //Verificar si hay usuario en localStorage (sesión persistente)
-    const savedUser = localStorage.getItem('technova_user');
+    const savedUser = localStorage.getItem('user');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
-
-    //Actualizar contador cada segundo (para simular cambios en tiempo real)
-    const interval = setInterval(updateCartCount, 1000);
-    return () => clearInterval(interval);
+    setLoading(false);
   }, []);
 
-  const handleAddToCart = (product, quantity = 1) => {
-    addToCart(product.id, quantity);
-    const count = getCartItemsCount();
-    setCartItemsCount(count);
-  };
-
-  const handleLogin = (email, password) => {
-    const user = authenticateUser(email, password);
-    if (user) {
-      setUser(user);
-      localStorage.setItem('technova_user', JSON.stringify(user));
-      return true;
-    }
-    return false;
-  };
-
-  const handleRegister = (userData) => {
-    const newUser = createUser(userData);
-    setUser(newUser);
-    localStorage.setItem('technova_user', JSON.stringify(newUser));
-    return newUser;
+  const handleLogin = (userData) => {
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const handleLogout = () => {
     setUser(null);
-    localStorage.removeItem('technova_user');
+    localStorage.removeItem('user');
+    localStorage.removeItem('cart');
   };
 
-  //Componente para redirección condicional del admin
-  const AdminRoute = ({ children }) => {
-    return user && user.role === 'admin' ? children : <Navigate to="/login" />;
-  };
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner"></div>
+        <p>Cargando Technova...</p>
+      </div>
+    );
+  }
 
   return (
-    <Router>
-      <MainLayout 
-        cartItemsCount={cartItemsCount} 
-        user={user} 
-        onLogout={handleLogout}
-      >
-        <Routes>
-          <Route 
-            path="/" 
-            element={
-              <Home 
-                onAddToCart={handleAddToCart}
-                onViewDetails={(product) => window.location.href = `/product/${product.id}`}
-              />
-            } 
-          />
-          <Route 
-            path="/categories" 
-            element={
-              <Categories 
-                onAddToCart={handleAddToCart}
-                onViewDetails={(product) => window.location.href = `/product/${product.id}`}
-              />
-            } 
-          />
-          <Route 
-            path="/category/:categorySlug" 
-            element={
-              <Categories 
-                onAddToCart={handleAddToCart}
-                onViewDetails={(product) => window.location.href = `/product/${product.id}`}
-              />
-            } 
-          />
-          <Route 
-            path="/offers" 
-            element={
-              <Offers 
-                onAddToCart={handleAddToCart}
-                onViewDetails={(product) => window.location.href = `/product/${product.id}`}
-              />
-            } 
-          />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/cart" element={<Cart user={user} />} />
-          <Route path="/checkout" element={<Checkout user={user} />} />
-          <Route path="/order-success" element={<OrderSuccess />} />
-          <Route 
-            path="/product/:id" 
-            element={
-              <ProductDetail 
-                onAddToCart={handleAddToCart}
-              />
-            } 
-          />
-          <Route 
-            path="/login" 
-            element={
-              <Login 
-                onLogin={handleLogin}
-                onRegister={handleRegister}
-              />
-            } 
-          />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/about" element={<About />} />
-          <Route 
-            path="/admin/*" 
-            element={
-              <AdminRoute>
-                <Admin />
-              </AdminRoute>
-            } 
-          />
-          {/* Redirección por defecto */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </MainLayout>
-    </Router>
+    <CartProvider>
+      <Router>
+        <div className="App">
+          <Routes>
+            <Route path="/" element={<Home user={user} onLogout={handleLogout} />} />
+            <Route path="/login" element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/" />} />
+            <Route path="/register" element={!user ? <Register onLogin={handleLogin} /> : <Navigate to="/" />} />
+            <Route path="/categories" element={<Categories user={user} onLogout={handleLogout} />} />
+            <Route path="/categories/:categoryName" element={<Categories user={user} onLogout={handleLogout} />} />
+            <Route path="/blog" element={<Blog user={user} onLogout={handleLogout} />} />
+            <Route path="/admin" element={user?.role === 'admin' ? <Admin user={user} onLogout={handleLogout} /> : <Navigate to="/" />} />
+            <Route path="/cart" element={<Cart user={user} onLogout={handleLogout} />} />
+            <Route path="/checkout" element={user ? <Checkout user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} />
+            <Route path="/order-success" element={<OrderSuccess user={user} onLogout={handleLogout} />} />
+            <Route path="/product/:id" element={<ProductDetail user={user} onLogout={handleLogout} />} />
+            <Route path="/offers" element={<Offers user={user} onLogout={handleLogout} />} />
+            <Route path="/about" element={<About user={user} onLogout={handleLogout} />} />
+            <Route path="/contact" element={<Contact user={user} onLogout={handleLogout} />} />
+          </Routes>
+        </div>
+      </Router>
+    </CartProvider>
   );
 }
 

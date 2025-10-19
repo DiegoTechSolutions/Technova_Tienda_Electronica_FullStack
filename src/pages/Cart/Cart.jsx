@@ -1,180 +1,250 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Table, Button, Form, Card, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { getCart, updateCartItem, removeFromCart, getProductById } from '../../data/database';
+import { useCart } from '../../contexts/CartContext';
 import './Cart.css';
 
-const Cart = ({ user }) => {
-  const [cartItems, setCartItems] = useState(getCart());
+const Cart = ({ user, onLogout }) => {
+  const { cart, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCart();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const updateQuantity = (itemId, newQuantity) => {
+  const handleQuantityChange = (productId, newQuantity) => {
     if (newQuantity < 1) return;
-    const updatedCart = updateCartItem(itemId, newQuantity);
-    setCartItems([...updatedCart]);
+    updateQuantity(productId, newQuantity);
   };
 
-  const removeItem = (itemId) => {
-    const updatedCart = removeFromCart(itemId);
-    setCartItems([...updatedCart]);
+  const handleRemoveItem = (productId) => {
+    if (window.confirm('¿Estás seguro de eliminar este producto del carrito?')) {
+      removeFromCart(productId);
+    }
   };
 
-  const getCartTotal = () => {
-    return cartItems.reduce((total, item) => {
-      const product = getProductById(item.productId);
-      return total + (product ? product.price * item.quantity : 0);
-    }, 0);
-  };
-
-  const proceedToCheckout = () => {
-    if (cartItems.length === 0) {
+  const handleCheckout = () => {
+    if (cart.length === 0) {
       alert('Tu carrito está vacío');
       return;
     }
-    navigate('/checkout');
+    setLoading(true);
+    setTimeout(() => {
+      navigate('/checkout');
+    }, 1000);
   };
 
-  if (cartItems.length === 0) {
+  const handleContinueShopping = () => {
+    navigate('/categories');
+  };
+
+  if (cart.length === 0) {
     return (
-      <Container className="cart-page">
-        <Row>
-          <Col>
-            <div className="empty-cart text-center py-5">
-              <h2>Tu carrito está vacío</h2>
-              <p>Agrega algunos productos increíbles</p>
-              <Link to="/categories" className="btn btn-primary btn-lg">
-                Continuar Comprando
-              </Link>
+      <div className="cart-page">
+        <header className="main-header">
+          <div className="container">
+            <div className="header-content">
+              <div className="logo">
+                <h1>Technova</h1>
+              </div>
+              <nav className="main-nav">
+                <Link to="/" className="nav-link">Inicio</Link>
+                <Link to="/categories" className="nav-link">Categorías</Link>
+                <Link to="/offers" className="nav-link">Ofertas</Link>
+                <Link to="/about" className="nav-link">Nosotros</Link>
+                <Link to="/blog" className="nav-link">Blog</Link>
+                <Link to="/contact" className="nav-link">Contacto</Link>
+              </nav>
+              <div className="header-actions">
+                {user ? (
+                  <div className="user-info">
+                    <span className="welcome-text">Bienvenido, {user.name}</span>
+                    <Link to="/cart" className="btn btn-primary btn-sm cart-btn active">
+                      🛒 Carrito ({cart.length})
+                    </Link>
+                    <button onClick={onLogout} className="btn btn-outline btn-sm logout-btn">
+                      Cerrar Sesión
+                    </button>
+                  </div>
+                ) : (
+                  <div className="auth-buttons">
+                    <Link to="/login" className="btn btn-outline btn-sm login-btn">
+                      Iniciar Sesión
+                    </Link>
+                    <Link to="/register" className="btn btn-primary btn-sm register-btn">
+                      Registrarse
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
-          </Col>
-        </Row>
-      </Container>
+          </div>
+        </header>
+
+        <section className="breadcrumb-section">
+          <div className="container">
+            <nav className="breadcrumb">
+              <Link to="/">Inicio</Link>
+              <span>/</span>
+              <span className="current-category">Carrito de Compras</span>
+            </nav>
+          </div>
+        </section>
+
+        <section className="empty-cart-section">
+          <div className="container">
+            <div className="empty-cart-content">
+              <div className="empty-cart-icon">🛒</div>
+              <h2>Tu carrito está vacío</h2>
+              <p>Agrega algunos productos increíbles de Technova</p>
+              <button onClick={handleContinueShopping} className="btn btn-primary btn-lg">
+                Continuar Comprando
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
     );
   }
 
   return (
-    <Container className="cart-page">
-      <Row>
-        <Col>
-          <h1 className="page-title">Carrito de Compras</h1>
-        </Col>
-      </Row>
-
-      <Row>
-        <Col lg={8}>
-          <div className="cart-items">
-            <Table responsive className="cart-table">
-              <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th>Precio</th>
-                  <th>Cantidad</th>
-                  <th>Subtotal</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cartItems.map(item => {
-                  const product = getProductById(item.productId);
-                  if (!product) return null;
-
-                  return (
-                    <tr key={item.id}>
-                      <td>
-                        <div className="product-info">
-                          <img 
-                            src={product.image} 
-                            alt={product.name}
-                            className="product-image"
-                          />
-                          <div className="product-details">
-                            <h5>{product.name}</h5>
-                            <span className="category">{product.category}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td>${product.price.toLocaleString()}</td>
-                      <td>
-                        <div className="quantity-controls">
-                          <Button
-                            variant="outline-secondary"
-                            size="sm"
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          >
-                            -
-                          </Button>
-                          <span className="quantity">{item.quantity}</span>
-                          <Button
-                            variant="outline-secondary"
-                            size="sm"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          >
-                            +
-                          </Button>
-                        </div>
-                      </td>
-                      <td>${(product.price * item.quantity).toLocaleString()}</td>
-                      <td>
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          onClick={() => removeItem(item.id)}
-                        >
-                          Eliminar
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </Table>
-          </div>
-        </Col>
-
-        <Col lg={4}>
-          <Card className="cart-summary">
-            <Card.Header>
-              <h5>Resumen del Pedido</h5>
-            </Card.Header>
-            <Card.Body>
-              <div className="summary-item">
-                <span>Subtotal:</span>
-                <span>${getCartTotal().toLocaleString()}</span>
-              </div>
-              <div className="summary-item">
-                <span>Envío:</span>
-                <span>$0</span>
-              </div>
-              <div className="summary-item total">
-                <strong>Total:</strong>
-                <strong>${getCartTotal().toLocaleString()}</strong>
-              </div>
-
-              {!user && (
-                <Alert variant="info" className="mt-3">
-                  <small>
-                    <Link to="/login">Inicia sesión</Link> para guardar tu información
-                  </small>
-                </Alert>
+    <div className="cart-page">
+      <header className="main-header">
+        <div className="container">
+          <div className="header-content">
+            <div className="logo">
+              <h1>Technova</h1>
+            </div>
+            <nav className="main-nav">
+              <Link to="/" className="nav-link">Inicio</Link>
+              <Link to="/categories" className="nav-link">Categorías</Link>
+              <Link to="/offers" className="nav-link">Ofertas</Link>
+              <Link to="/about" className="nav-link">Nosotros</Link>
+              <Link to="/blog" className="nav-link">Blog</Link>
+              <Link to="/contact" className="nav-link">Contacto</Link>
+            </nav>
+            <div className="header-actions">
+              {user ? (
+                <div className="user-info">
+                  <span className="welcome-text">Bienvenido, {user.name}</span>
+                  <Link to="/cart" className="btn btn-primary btn-sm cart-btn active">
+                    🛒 Carrito ({cart.reduce((total, item) => total + item.quantity, 0)})
+                  </Link>
+                  <button onClick={onLogout} className="btn btn-outline btn-sm logout-btn">
+                    Cerrar Sesión
+                  </button>
+                </div>
+              ) : (
+                <div className="auth-buttons">
+                  <Link to="/login" className="btn btn-outline btn-sm login-btn">
+                    Iniciar Sesión
+                  </Link>
+                  <Link to="/register" className="btn btn-primary btn-sm register-btn">
+                    Registrarse
+                  </Link>
+                </div>
               )}
+            </div>
+          </div>
+        </div>
+      </header>
 
-              <Button
-                variant="primary"
-                size="lg"
-                className="w-100 mt-3"
-                onClick={proceedToCheckout}
-              >
-                Proceder al Pago
-              </Button>
+      <section className="breadcrumb-section">
+        <div className="container">
+          <nav className="breadcrumb">
+            <Link to="/">Inicio</Link>
+            <span>/</span>
+            <span className="current-category">Carrito de Compras</span>
+          </nav>
+        </div>
+      </section>
 
-              <Link to="/categories" className="btn btn-outline-secondary w-100 mt-2">
-                Continuar Comprando
-              </Link>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+      <section className="cart-section">
+        <div className="container">
+          <div className="cart-layout">
+            <div className="cart-main">
+              <div className="cart-header">
+                <h1>Carrito de Compras</h1>
+                <button onClick={clearCart} className="btn btn-outline btn-sm">
+                  Vaciar Carrito
+                </button>
+              </div>
+
+              <div className="cart-items">
+                {cart.map(item => (
+                  <div key={item.id} className="cart-item">
+                    <div className="item-image">
+                      <div className="image-placeholder">{item.image}</div>
+                    </div>
+                    <div className="item-details">
+                      <h3 className="item-name">{item.name}</h3>
+                      <p className="item-description">{item.description}</p>
+                      <div className="item-price">${item.price.toLocaleString()}</div>
+                    </div>
+                    <div className="item-quantity">
+                      <button
+                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                        className="quantity-btn"
+                        disabled={item.quantity <= 1}
+                      >
+                        -
+                      </button>
+                      <span className="quantity-display">{item.quantity}</span>
+                      <button
+                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                        className="quantity-btn"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <div className="item-subtotal">
+                      ${(item.price * item.quantity).toLocaleString()}
+                    </div>
+                    <button
+                      onClick={() => handleRemoveItem(item.id)}
+                      className="remove-btn"
+                      title="Eliminar producto"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="cart-summary">
+              <div className="summary-card">
+                <h3>Resumen de Compra</h3>
+                <div className="summary-details">
+                  <div className="summary-row">
+                    <span>Subtotal:</span>
+                    <span>${getCartTotal().toLocaleString()}</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Envío:</span>
+                    <span className="free-shipping">Gratis</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Descuento:</span>
+                    <span className="discount">-$0</span>
+                  </div>
+                  <div className="summary-row total">
+                    <span>Total:</span>
+                    <span>${getCartTotal().toLocaleString()}</span>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCheckout}
+                  disabled={loading}
+                  className="btn btn-primary btn-block checkout-btn"
+                >
+                  {loading ? 'Procesando...' : 'Proceder al Pago'}
+                </button>
+                <button onClick={handleContinueShopping} className="btn btn-outline btn-block">
+                  Continuar Comprando
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 };
 
