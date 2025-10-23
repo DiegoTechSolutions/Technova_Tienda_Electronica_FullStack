@@ -1,3 +1,25 @@
+npm i react-router-dom
+
+# Bootstrap 5 + componentes para React
+npm i bootstrap react-bootstrap
+
+# Test runner + framework
+npm i -D karma karma-jasmine jasmine-core karma-chrome-launcher
+
+# Reporte de cobertura
+npm i -D karma-coverage
+
+# Para renderizar componentes en tests y simular interacción
+npm i -D @testing-library/react @testing-library/user-event
+
+
+
+
+
+
+
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
